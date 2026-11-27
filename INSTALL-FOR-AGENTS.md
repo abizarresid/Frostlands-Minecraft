@@ -108,8 +108,8 @@ After the first launch, open `$GAME/config/realwaves.properties`:
 Latest release: https://github.com/abizarresid/Frostlands-Minecraft/releases/latest
 
 ```bash
-curl -L -o "$GAME/mods/hearth-christmas-1.0.0.jar" https://github.com/abizarresid/Frostlands-Minecraft/releases/download/v1.0/hearth-christmas-1.0.0.jar
-curl -L -o "$GAME/shaderpacks/Hearth.zip"           https://github.com/abizarresid/Frostlands-Minecraft/releases/download/v1.0/Hearth.zip
+curl -L -o "$GAME/mods/hearth-christmas-1.0.0.jar" https://github.com/abizarresid/Frostlands-Minecraft/releases/latest/download/hearth-christmas-1.0.0.jar
+curl -L -o "$GAME/shaderpacks/Hearth.zip"           https://github.com/abizarresid/Frostlands-Minecraft/releases/latest/download/Hearth.zip
 ```
 
 Check:
@@ -138,9 +138,9 @@ Check: the Hearth options menu has Look Style, Sunset, Night & Moon, Lighting, W
    - `/worldborder set 15000`: the world's edge.
 
 **Important:** the Frostlands world is still in development:
-- Lakes and rivers have no water yet.
-- There are no caves, roads or buildings yet.
+- It has the terrain, lakes and rivers, caves, roads and bridges, and flat building sites, but no village buildings yet.
 - Worlds made with this version **won't update** when the generator changes.
+- If the player already has the older `hearth-christmas-1.0.0.jar`, replace it with the new download (same file name) and make a new world.
 
 The real game will be one shared world that everyone joins. Use this version to look around, not to build anything permanent.
 

@@ -27,8 +27,8 @@ It draws the big ocean waves from the **Boats N Waves** mod, so the boats ride t
 Create New World → More World Options → **World Type: Frostlands**. You wake up on the shipwreck beach of the starting island.
 
 This is a **preview**:
-- Lakes and rivers have no water yet.
-- There are no caves, roads or buildings yet.
+- It has the full island world: eroded valleys and mountains, lakes and rivers, caves, Mount Ashen's crater, roads with timber bridges, and flat building sites for the villages.
+- The villages and buildings themselves aren't built yet.
 - Preview worlds won't update when the generator changes.
 
 The real game will be one shared world everyone joins.
