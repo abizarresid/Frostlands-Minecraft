@@ -1,0 +1,218 @@
+screen.LIGHTING=Lighting
+screen.WATER=Water
+screen.ATMOSPHERE=Sky & Atmosphere
+screen.POST=Camera & Colour
+
+option.SUN_BRIGHTNESS=Sunlight Brightness
+option.AMBIENT_BRIGHTNESS=Shadow Brightness
+option.TORCH_BRIGHTNESS=Torch Brightness
+option.SHADOW_SOFTNESS=Shadow Softness
+option.shadowMapResolution=Shadow Quality
+option.shadowDistance=Shadow Distance
+option.sunPathRotation=Sun Angle
+option.WAVING_PLANTS=Swaying Plants
+option.WATER_WAVES=Water Waves
+option.WATER_WAVE_STRENGTH=Wave Strength
+option.REAL_WAVES=Real Waves (Boats N Waves)
+option.REAL_WAVES.comment=Draw the wave mod's waves: the same ones boats ride, with whitecaps and surf on beaches.
+option.WAVE_QUALITY=Wave Quality
+value.WAVE_QUALITY.0=Fast
+value.WAVE_QUALITY.1=Full (heavy)
+option.WAVE_QUALITY.comment=Fast works the waves out per block corner, Full per pixel. Full can make laptops hot.
+option.WAVE_FOAM=Whitecaps and Surf
+option.BOAT_WAKES=Boat Wakes
+option.BOAT_WAKES.comment=The wave mod's foam trail behind boats. Off by default: it looks fake with this water.
+option.WAVE_RANGE=Wave Distance
+option.WAVE_RANGE.comment=How far out the big waves are drawn (Fast quality). Past it the sea calms down. Lower = faster.
+option.WAVE_DETAIL_DIST=Fine Ripple Distance
+option.WAVE_DETAIL_DIST.comment=How far out the finest ripples are drawn. Lower runs faster in storms.
+option.WATER_SWELL_ON=Ocean Swell
+option.WATER_SWELL_HEIGHT=Swell Height
+option.WATER_SWELL_ON.comment=Long rolling waves that move the sea itself. Bigger in storms. Lakes get a small one.
+option.WATER_REFLECTIONS=Water Reflections
+option.WATER_CLARITY=Water Clarity
+option.SKY_BRIGHTNESS=Sky Brightness
+option.FOG_DENSITY=Haze Amount
+option.GODRAYS=Sun Rays
+option.GODRAY_STRENGTH=Sun Ray Strength
+option.EXPOSURE=Brightness
+option.BLOOM_STRENGTH=Glow (Bloom)
+option.SATURATION=Colour Saturation
+option.WARMTH=Warmth
+option.VIGNETTE=Vignette
+option.WATER_STYLE=Water Style
+value.WATER_STYLE.0=Clear
+value.WATER_STYLE.1=Glacial Turquoise
+option.CLOUD_COVERAGE=Cloud Amount
+option.VALLEY_MIST=Valley Mist
+option.PNW_GRADE=Pacific Northwest Look
+option.WINTER_GRADE=Winter and Christmas Look
+option.WINTER_GRADE.comment=Frosty blue shadows, clean white snow, and Christmas reds that glow a little richer.
+option.EDGE_FOG_START=Far Edge Fade
+option.EDGE_FOG_START.comment=Where the end of your render distance starts melting into the sky. Lower hides it sooner.
+value.WATER_STYLE.2=Dark Forest Lake
+option.CLOUD_QUALITY=Cloud Quality
+value.CLOUD_QUALITY.0=Fast
+value.CLOUD_QUALITY.1=Balanced
+value.CLOUD_QUALITY.2=Pretty
+option.CLOUD_STYLE=Clouds
+value.CLOUD_STYLE.0=Off
+value.CLOUD_STYLE.1=Flat (fast)
+value.CLOUD_STYLE.2=3D (slow)
+option.SHADOW_SAMPLES=Shadow Smoothness
+value.SHADOW_SAMPLES.1=Fast
+value.SHADOW_SAMPLES.4=Smooth
+value.SHADOW_SAMPLES.8=Very Smooth
+option.CAUSTICS=Light Ripples Underwater
+
+option.WATER_HOLE_DEBUG=Show Water Holes (debug)
+option.WATER_HOLE_DEBUG.comment=Paints any spot where the water surface is missing bright magenta. For tracking down glitches; leave off to play.
+value.WATER_STYLE.3=Auto (by height)
+option.GLACIAL_START=Glacial Lakes From
+option.GLACIAL_START.comment=Auto water style: water higher than this turns glacial turquoise; the sea and lowland lakes stay dark.
+screen.LOOK=Look Style & Mood
+option.LOOK_STYLE=Look Style
+option.LOOK_STYLE.comment=Overall colour grading and atmosphere preset. Hearth Classic preserves the original look unchanged.
+value.LOOK_STYLE.0=Hearth Classic
+value.LOOK_STYLE.1=PNW Moody
+value.LOOK_STYLE.2=Clear Winter
+
+option.EVERGREEN_DEPTH=Evergreen Depth
+option.EVERGREEN_DEPTH.comment=Shifts bright yellow-greens into deep, dark Douglas-fir blue-green (PNW Moody & Clear Winter).
+value.EVERGREEN_DEPTH.-1.0=Style Default
+
+option.SHADOW_COOLNESS=Shadow Coolness
+option.SHADOW_COOLNESS.comment=Strength of the cool teal-slate (PNW) or frost-blue (Winter) tint in shadows and midtones.
+value.SHADOW_COOLNESS.-1.0=Style Default
+
+option.BLACK_LIFT=Filmic Black Lift
+option.BLACK_LIFT.comment=Raises the darkest blacks for a soft, matte filmic look. Set to 0.0 for crisp deep blacks.
+value.BLACK_LIFT.-1.0=Style Default
+
+option.WARM_ACCENT_POP=Warm Accent Pop
+option.WARM_ACCENT_POP.comment=Keeps lanterns, warm signs, and Christmas reds vivid against cool shadows and mist.
+value.WARM_ACCENT_POP.-1.0=Style Default
+
+option.MOOD_CONTRAST=Mood Contrast
+option.MOOD_CONTRAST.comment=Strength of the filmic S-curve contrast. Higher values deepen foreground shadows while haze softens the distance.
+value.MOOD_CONTRAST.-1.0=Style Default
+
+option.FOREST_FOG=Forest Fog
+option.FOREST_FOG.comment=Extra near-ground mist that thickens between tree trunks under overcast skies and low sun.
+value.FOREST_FOG.-1.0=Style Default
+
+option.MOUNTAIN_CLOUDS=Mountain Clouds
+option.MOUNTAIN_CLOUDS.comment=Density of low cloud wisps hugging forested mountainsides.
+value.MOUNTAIN_CLOUDS.-1.0=Style Default
+option.HORIZON_HAZE=Horizon Haze
+option.HORIZON_HAZE.comment=Blends the sky at the horizon into the sea haze, so the far sea has no visible edge.
+screen.SKY=Sunset, Night & Moon
+screen.SKY=Sky, Sunset & Night
+screen.SKY.comment=Sunset moods, night atmospheres, procedural moon, and stars.
+
+option.SUNSET_STYLE=Sunset Mood
+option.SUNSET_STYLE.comment=Sunset mood tuned to your active Look Style. PNW Moody: 0 Default, 1 Mt. Rainier Alpenglow (pastel dusk, pink peaks), 2 Cascades Golden Hour (amber valley haze, strong backlit glow). Classic & Winter also offer Alpenglow and Golden Hour variants.
+value.SUNSET_STYLE.0=Default
+value.SUNSET_STYLE.1=Alpenglow (Rainier / Pastel)
+value.SUNSET_STYLE.2=Golden Hour (Cascades / Amber)
+
+option.NIGHT_STYLE=Night Mood
+option.NIGHT_STYLE.comment=Night mood tuned to your active Look Style. PNW Moody: 0 Default, 1 Blue Hour Forest Fog, 2 Dark Rainforest. Classic: 1 Moonlit Mist, 2 Starry Clear. Clear Winter: 1 Moonlit Snow Blue, 2 Arctic Starlight.
+value.NIGHT_STYLE.0=Default
+value.NIGHT_STYLE.1=Blue Hour / Moonlit Mist
+value.NIGHT_STYLE.2=Dark Rainforest / Starry Clear
+
+option.SUNSET_INTENSITY=Sunset Intensity
+option.SUNSET_INTENSITY.comment=Strength of sunset sky colours, sun glow, and sunset colour grading.
+
+option.ALPENGLOW=Alpenglow Strength
+option.ALPENGLOW.comment=Intensity of the pink-coral alpenglow on sunlit snow peaks and bright highlights in Alpenglow sunset styles.
+
+option.NIGHT_BRIGHTNESS=Night Brightness
+option.NIGHT_BRIGHTNESS.comment=Overall brightness of night sky, ambient light, and moonlight.
+
+option.NIGHT_FOG=Night Fog & Haze
+option.NIGHT_FOG.comment=Brightness and lift of night horizon haze and forest fog (especially visible in Blue Hour Forest Fog).
+
+option.MOON_SIZE=Moon Size
+option.MOON_SIZE.comment=Apparent angular size of the procedural moon disc.
+
+option.MOON_BRIGHTNESS=Moon Brightness
+option.MOON_BRIGHTNESS.comment=Brightness of the procedural moon disc and its earthshine.
+
+option.MOON_HALO=Moon Halo
+option.MOON_HALO.comment=Strength of the atmospheric glow around the moon (widens naturally in haze and rain).
+
+option.STAR_AMOUNT=Star Amount
+option.STAR_AMOUNT.comment=Density of procedural twinkling stars in the night sky (0 disables stars).
+profile.POTATO=Potato (weak laptops)
+profile.LAPTOP=Laptop (fanless MacBook)
+profile.BALANCED=Balanced
+profile.HIGH=High (gaming PC)
+profile.comment=Laptop is tuned to keep a fanless MacBook cool. Potato turns off shadows, sun rays, bloom and reflections for weak machines.
+option.SHADOWS=Shadows
+option.SHADOWS.comment=Sun shadows. The most expensive feature: the world is drawn twice. Off = much cooler and faster.
+option.BLOOM=Bloom
+option.BLOOM.comment=Soft glow around bright lights and the sun.
+value.LOOK_STYLE.3=Dreamy
+
+option.PASTEL_AMOUNT=Dreamy Pastel Amount
+option.PASTEL_AMOUNT.comment=Strength of Dreamy's lifted pastel lavender-pink sky, milky haze, and soft color grade.
+
+option.SUN_GLOW_SIZE=Dreamy Sun Glow Size
+option.SUN_GLOW_SIZE.comment=Size of Dreamy's creamy sun disc and wide soft bloom halo.
+
+option.CLOUD_PUFFINESS=Dreamy Cloud Puffiness
+option.CLOUD_PUFFINESS.comment=Billow detail, self-shadow depth, and silver-lining strength on Dreamy's flat cumulus clouds.
+option.GENERATED_NORMALS=Texture Depth
+option.GENERATED_NORMALS.comment=Fake bumps made from each block texture, so sunlight picks out bark, stone and leaf detail (within ~40 blocks).
+option.GEN_NORMAL_STRENGTH=Texture Depth Strength
+option.COATED_TEXTURES=Coated Textures
+option.COATED_TEXTURES.comment=A faint grain on block surfaces so they don't look like flat paint.
+option.WORLD_OUTLINE=Block Outlines
+option.WORLD_OUTLINE.comment=Soft dark outlines on block edges and silhouettes, for a crisp, defined look.
+option.WORLD_OUTLINE_STRENGTH=Outline Strength
+
+option.DAY_INTENSITY=Day Style Intensity
+option.DAY_INTENSITY.comment=Strength of the selected Day Style look (sky, sunlight, shadow fill, and colour grade). Has no effect when Day Style is Default.
+option.SUNRISE_STYLE=Sunrise Style
+option.SUNRISE_STYLE.comment=Mood for dawn (23000-1500), tailored to the active Look Style. Classic: 1 Rosy Pastel Dawn, 2 Golden Clear Dawn. PNW Moody: 1 Fog-Bound Pink Seam, 2 Mt. Rainier Dawn Alpenglow. Clear Winter: 1 Frosty Pink, 2 Deep Orange Cold Dawn. Dreamy: 1 Peach-Lilac, 2 Rose-Gold.
+value.SUNRISE_STYLE.0=Default
+value.SUNRISE_STYLE.1=Style 1
+value.SUNRISE_STYLE.2=Style 2
+
+option.MORNING_STYLE=Morning Style
+option.MORNING_STYLE.comment=Mood for morning (1000-4500), tailored to the active Look Style. Classic: 1 Fresh Cool Crisp, 2 Misty Soft. PNW Moody: 1 Burning-Off Marine Layer, 2 Drizzle Grey. Clear Winter: 1 Diamond-Dust Sparkle, 2 Pale Blue Cold. Dreamy: 1 Soft Mint-Blue, 2 Dewy Haze.
+value.MORNING_STYLE.0=Default
+value.MORNING_STYLE.1=Style 1
+value.MORNING_STYLE.2=Style 2
+
+option.MIDDAY_STYLE=Midday Style
+option.MIDDAY_STYLE.comment=Mood for midday (4000-8000), tailored to the active Look Style. Classic: 1 Crisp Clear, 2 Soft Overcast. PNW Moody: 1 Sun Breaks After Rain, 2 Marine-Layer Grey. Clear Winter: 1 Bluebird Powder, 2 Ice-Crystal Haze. Dreamy: 1 Cotton-Candy, 2 Golden Lazy.
+value.MIDDAY_STYLE.0=Default
+value.MIDDAY_STYLE.1=Style 1
+value.MIDDAY_STYLE.2=Style 2
+
+option.AFTERNOON_STYLE=Afternoon Style
+option.AFTERNOON_STYLE.comment=Mood for afternoon (7500-11500), tailored to the active Look Style. Classic: 1 Warm Golden, 2 Hazy Summer. PNW Moody: 1 Low-Angle Forest Shafts, 2 Squally Showers. Clear Winter: 1 Long Blue Shadows & Golden Snow, 2 Flat White. Dreamy: 1 Apricot Glow, 2 Lavender Drift.
+value.AFTERNOON_STYLE.0=Default
+value.AFTERNOON_STYLE.1=Style 1
+value.AFTERNOON_STYLE.2=Style 2
+
+option.SUNSET_STYLE=Sunset Style
+option.SUNSET_STYLE.comment=Mood for dusk (11000-13500), tailored to the active Look Style. Classic: 1 Rose Alpenglow, 2 Amber Golden Hour. PNW Moody: 1 Mt. Rainier Alpenglow, 2 Cascades Golden Hour. Clear Winter: 1 Alpine Alpenglow, 2 Winter Gold. Dreamy: 1 Cotton-Candy Alpenglow, 2 Honey Peach Golden Hour.
+value.SUNSET_STYLE.0=Default
+value.SUNSET_STYLE.1=Style 1
+value.SUNSET_STYLE.2=Style 2
+
+option.NIGHT_STYLE=Night Style
+option.NIGHT_STYLE.comment=Mood for night, tailored to the active Look Style. Classic: 1 Moonlit Mist, 2 Starry Clear. PNW Moody: 1 Blue Hour Forest Fog, 2 Dark Rainforest. Clear Winter: 1 Moonlit Snow Blue, 2 Arctic Starlight. Dreamy: 1 Lavender Mist Night, 2 Starry Violet Night.
+value.NIGHT_STYLE.0=Default
+value.NIGHT_STYLE.1=Style 1
+value.NIGHT_STYLE.2=Style 2
+
+option.DAY_INTENSITY=Daytime Mood Intensity
+option.DAY_INTENSITY.comment=Scales the strength of Morning, Midday, and Afternoon mood styles.
+
+option.SUNSET_INTENSITY=Sunrise / Sunset Intensity
+option.SUNSET_INTENSITY.comment=Scales the strength of Sunrise and Sunset sky glow and mood styles.
