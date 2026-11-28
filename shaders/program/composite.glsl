@@ -302,11 +302,15 @@ vec3 dhScreenToView(vec2 uv, float depth) {
 // renderWater: sky and cloud reflection, the dark body of the water, a hint of the sea floor in the shallows.
 vec3 renderFarWater(vec3 floorColor, vec3 viewPos, vec3 floorPos, vec3 viewDir) {
     vec3 n = mat3(gbufferModelView) * vec3(0.0, 1.0, 0.0);
-    float cosTheta = clamp(dot(-viewDir, n), 0.0, 1.0);
+    // the open sea is never a flat mirror: its waves tilt the surface, so at low angles it reflects far less sky than
+    // flat water would. Treat the far sea as that rough (as dark as the wavy near water), or it turns into a bright
+    // band at the edge of the normal render distance, and Distant Horizons' detail rings show as lighter slabs
+    float cosTheta = max(clamp(dot(-viewDir, n), 0.0, 1.0), 0.22);
     float fresnel = 0.02 + 0.98 * pow(1.0 - cosTheta, 5.0);
     vec3 R = reflect(viewDir, n);
     float eyeSky = eyeBrightnessSmooth.y / 240.0;
-    vec3 reflection = getSkyColor(R) * max(eyeSky, 0.3);
+    vec4 rc = getReflectedClouds(R);                       // the same cloud reflection as the near water
+    vec3 reflection = (getSkyColor(R) * rc.a + rc.rgb) * max(eyeSky, 0.3);
     float waterDepth = distance(viewPos, floorPos);
     vec3 absorb, tint; float scatterK;
     waterLook((gbufferModelViewInverse * vec4(viewPos, 1.0)).y + cameraPosition.y, absorb, tint, scatterK);
