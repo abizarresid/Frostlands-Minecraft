@@ -14,6 +14,18 @@ float getSunsetFactor(float h) {
 
 float getDayFactor(float h)   { return smoothstep(-0.08, 0.28, h); }
 float getNightFactor(float h) { return 1.0 - smoothstep(-0.22, 0.02, h); }
+
+#if LOOK_STYLE == 3
+// Dreamy = the Complementary Unbound look the user's friend plays with (his settings, Nov 2026): sunlight and sky tinted
+// pink-lavender at noon (green x0.85, blue x1.10; light x1.10) and rosy in the morning and evening (red and blue x1.10,
+// light x0.90). PASTEL_AMOUNT scales it (1.0 = his settings).
+vec3 dreamyTint(float h, bool light) {
+    vec3 noon = light ? vec3(1.00, 0.85, 1.10) * 1.10 : vec3(1.00, 0.85, 1.10);
+    vec3 low  = light ? vec3(1.10, 1.00, 1.10) * 0.90 : vec3(1.00, 1.00, 1.10);
+    vec3 t = mix(noon, low, clamp(getSunsetFactor(h), 0.0, 1.0));
+    return max(mix(vec3(1.0), t, clamp(PASTEL_AMOUNT, 0.0, 1.5)), 0.0);
+}
+#endif
 // 1 in full daytime, 0 around sunrise/sunset/night
 float getFullDayFactor(float h) {
     return clamp(smoothstep(0.15, 0.45, h) * (1.0 - getSunsetFactor(h)), 0.0, 1.0);
@@ -346,6 +358,9 @@ vec3 getDirectLightColor() {
     // fade out around the horizon so the sun/moon swap is invisible
     col *= smoothstep(0.0, 0.07, abs(h));
     col *= 1.0 - rainStrength * 0.9;
+#if LOOK_STYLE == 3
+    col *= dreamyTint(h, true);
+#endif
     return max(col, 0.0) * SUN_BRIGHTNESS;
 #endif
 }
@@ -360,7 +375,7 @@ vec3 getAmbientColor() {
     float h = getSunHeight();
 #if LOOK_STYLE == 3
     // Dreamy: cool lavender-blue shadow fill so shaded snow & interiors read soft purple, never black
-    vec3 dayCol = vec3(0.42, 0.41, 0.62) * 0.68;
+    vec3 dayCol = vec3(0.40, 0.46, 0.62) * 0.70;   // (was purple-grey: it turned shaded leaves grey)
 #else
     vec3 dayCol = vec3(0.34, 0.42, 0.56) * 0.62;
 #endif
@@ -413,7 +428,7 @@ vec3 getAmbientColor() {
         #if LOOK_STYLE == 1
             #if MIDDAY_STYLE == 1
             // PNW Moody - Sun breaks after rain: moody blue-grey shadow fill under dark clouds
-            dDayCol = vec3(0.22, 0.30, 0.40) * 0.52;
+            dDayCol = vec3(0.28, 0.38, 0.48) * 0.60;
             #elif MIDDAY_STYLE == 2
             // PNW Moody - Marine-layer grey: high, flat pearly cool-silver fill
             dDayCol = vec3(0.50, 0.56, 0.62) * 0.92;
@@ -429,7 +444,7 @@ vec3 getAmbientColor() {
         #elif LOOK_STYLE == 3
             #if MIDDAY_STYLE == 1
             // Dreamy - Cotton-candy: airy pastel lavender-blue fill
-            dDayCol = vec3(0.48, 0.45, 0.70) * 0.76;
+            dDayCol = vec3(0.44, 0.48, 0.68) * 0.76;
             #elif MIDDAY_STYLE == 2
             // Dreamy - Golden lazy: warm apricot-lavender shadow fill
             dDayCol = vec3(0.50, 0.44, 0.56) * 0.66;
@@ -607,6 +622,12 @@ vec3 getAmbientColor() {
     float phaseIllum = getMoonPhaseIllum();
     nightCol *= mix(0.84, 1.0, phaseIllum) * NIGHT_BRIGHTNESS;
 
+    // stronger daytime sky fill in shade (2026-11-27: with the grey lifts gone, forest shade went too dark to see into)
+#if LOOK_STYLE == 3
+    dayCol *= 1.45;
+#elif LOOK_STYLE == 1
+    dayCol *= 1.25;
+#endif
     vec3 col = mix(sunsetCol, dayCol, getDayFactor(h));
     col = mix(nightCol, col, smoothstep(-0.22, 0.04, h));
     float l = luminance(col);
@@ -615,6 +636,9 @@ vec3 getAmbientColor() {
     col = mix(col, vec3(l) * vec3(0.95, 0.93, 1.04) * 0.94, rainStrength * 0.78);
 #else
     col = mix(col, vec3(l) * vec3(0.9, 0.95, 1.05) * 0.75, rainStrength * 0.7);
+#endif
+#if LOOK_STYLE == 3
+    col *= mix(vec3(1.0), dreamyTint(h, false), 0.5);
 #endif
     return max(col, 0.0) * AMBIENT_BRIGHTNESS;
 #endif
@@ -1465,6 +1489,9 @@ vec3 getSkyColor(vec3 dir) {
     sky = mix(sky, overcastSky, rainStrength * 0.88);
 #else
     sky = mix(sky, vec3(l) * vec3(0.85, 0.9, 1.0) * 0.6, rainStrength * 0.85);
+#endif
+#if LOOK_STYLE == 3
+    sky *= dreamyTint(h, false);
 #endif
     return max(sky, 0.0) * SKY_BRIGHTNESS;
 #endif

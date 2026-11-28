@@ -40,7 +40,7 @@ const float shadowDistanceRenderMul = 1.0;
 // Atmosphere
 #define SKY_BRIGHTNESS 1.0      // [0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4]
 #define HORIZON_HAZE 1.0        // [0.0 0.5 0.75 1.0]  how much the sky at the horizon blends into the sea haze (hides where the world ends)
-#define EDGE_FOG_START 0.55     // [0.35 0.45 0.55 0.65 0.75]  where the far edge of the world starts fading into the sky
+#define EDGE_FOG_START 0.70     // [0.35 0.45 0.55 0.65 0.70 0.75 0.85]  where the far edge of the world starts fading into the sky
 #define FOG_DENSITY 1.0         // [0.0 0.25 0.5 0.75 1.0 1.5 2.0 3.0]
 //#define GODRAYS                     // sun rays (7 samples on every pixel)
 #define GODRAY_STRENGTH 0.75    // [0.25 0.5 0.75 1.0 1.25 1.5 2.0]

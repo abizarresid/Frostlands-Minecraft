@@ -29,6 +29,14 @@ vec3 acesFilmic(vec3 x) {
     return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0);
 }
 
+// A gentle matte toe. The grade works in linear light, where a shaded leaf is only ~0.006: adding a lift of 0.01-0.02
+// there (as the styles used to) turned every dark area into milky grey. The lift amounts now mean "how far black is
+// raised on screen": 0.018 lifts black to ~9/255, and dark colours keep their hue.
+vec3 softLift(vec3 color, vec3 lift) {
+    vec3 l = pow(clamp(lift, 0.0, 1.0) * 2.0, vec3(2.2));
+    return l + color * (1.0 - l);
+}
+
 vec3 sampleBloomLevel(float lod) {
     vec2 px = exp2(lod) / vec2(viewWidth, viewHeight);
     // 4 bilinear taps placed between texels = a smooth 4x4 tent filter
@@ -102,7 +110,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float mLum = luminance(color);
         color = mix(color, vec3(mLum) * vec3(0.98, 0.99, 1.02), clamp(mW * 0.14, 0.0, 0.28));
         vec3 mistLift = vec3(0.014, 0.015, 0.018) * clamp(mW, 0.0, 1.5);
-        color = mistLift + color * (1.0 - mistLift);
+        color = softLift(color, mistLift);
     }
     #endif
     #if MIDDAY_STYLE == 1
@@ -125,7 +133,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float dLum = luminance(color);
         color = mix(color, vec3(dLum) * vec3(0.97, 0.99, 1.03), clamp(dW * 0.18, 0.0, 0.35));
         vec3 overcastLift = vec3(0.014, 0.015, 0.018) * clamp(dW, 0.0, 1.5);
-        color = overcastLift + color * (1.0 - overcastLift);
+        color = softLift(color, overcastLift);
         color = color / (1.0 + 0.06 * clamp(dW, 0.0, 1.5) * max(color - 0.72, 0.0));
     }
     #endif
@@ -146,7 +154,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float aLum = luminance(color);
         color *= mix(vec3(1.0), vec3(1.05, 1.01, 0.92), clamp(smoothstep(0.30, 0.85, aLum) * aW * 0.45, 0.0, 1.0));
         vec3 hazeLift = vec3(0.016, 0.014, 0.010) * clamp(aW, 0.0, 1.5);
-        color = hazeLift + color * (1.0 - hazeLift);
+        color = softLift(color, hazeLift);
     }
     #endif
     #if SUNSET_STYLE == 1
@@ -178,7 +186,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float nl = luminance(color);
         color = mix(color, vec3(nl) * vec3(0.88, 0.95, 1.08), nW * 0.22);
         vec3 mistLift = vec3(0.008, 0.014, 0.024) * nW * clamp(NIGHT_FOG, 0.25, 2.0);
-        color = mistLift + color * (1.0 - mistLift);
+        color = softLift(color, mistLift);
     }
     #elif NIGHT_STYLE == 2
     {
@@ -222,7 +230,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
     float midW    = smoothstep(0.04, 0.28, lum) * (1.0 - smoothstep(0.46, 0.84, lum));
     float highW   = smoothstep(0.56, 0.94, lum);
     vec3 split    = vec3(1.0)
-                  + vec3(-0.14, -0.02,  0.10) * shadowW
+                  + vec3(-0.08,  0.00,  0.06) * shadowW
                   + vec3(-0.04,  0.01,  0.03) * midW
                   + vec3(-0.01,  0.00,  0.02) * highW;
     color = max(color * mix(vec3(1.0), split, clamp(shadowCoolness, 0.0, 1.5)), 0.0);
@@ -245,7 +253,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
 
     // 5) Barely lifted cool slate blacks so canopy shadows stay deep black-green
     vec3 liftCol = vec3(0.84, 0.95, 1.08) * clamp(blackLift, 0.0, 0.08);
-    color = liftCol + color * (1.0 - liftCol);
+    color = softLift(color, liftCol);
 
     // Respect user WARMTH adjustments relative to default 1.0
     color = max(color * mix(vec3(1.0), vec3(1.03, 1.0, 0.95), WARMTH - 1.0), 0.0);
@@ -261,7 +269,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         color = mix(color, vec3(rLum) * vec3(0.92, 0.96, 1.02), clamp(rW * 0.24, 0.0, 0.42));
         color *= mix(vec3(1.0), vec3(1.12, 0.90, 0.95), clamp(rHi * rW * 0.52, 0.0, 1.0));
         vec3 fogVeil = vec3(0.018, 0.022, 0.028) * clamp(rW, 0.0, 1.5);
-        color = fogVeil + color * (1.0 - fogVeil);
+        color = softLift(color, fogVeil);
     }
     #elif SUNRISE_STYLE == 2
     {
@@ -283,7 +291,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float mHi = smoothstep(0.46, 0.88, mLum);
         color *= mix(vec3(1.0), vec3(1.06, 1.02, 0.93), clamp(mHi * mW * 0.45, 0.0, 1.0));
         vec3 burnLift = vec3(0.016, 0.020, 0.024) * clamp(mW, 0.0, 1.5);
-        color = burnLift + color * (1.0 - burnLift);
+        color = softLift(color, burnLift);
     }
     #elif MORNING_STYLE == 2
     {
@@ -292,7 +300,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float mLum = luminance(color);
         color = mix(color, vec3(mLum) * vec3(0.90, 0.96, 1.02), clamp(mW * 0.32, 0.0, 0.50));
         vec3 drizLift = vec3(0.016, 0.022, 0.026) * clamp(mW, 0.0, 1.5);
-        color = drizLift + color * (1.0 - drizLift);
+        color = softLift(color, drizLift);
     }
     #endif
     #if MIDDAY_STYLE == 1
@@ -315,7 +323,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float dLum = luminance(color);
         color = mix(color, vec3(dLum) * vec3(0.94, 0.98, 1.03), clamp(dW * 0.28, 0.0, 0.48));
         vec3 marineLift = vec3(0.022, 0.026, 0.030) * clamp(dW, 0.0, 1.5);
-        color = marineLift + color * (1.0 - marineLift);
+        color = softLift(color, marineLift);
         color = color / (1.0 + 0.10 * clamp(dW, 0.0, 1.5) * max(color - 0.68, 0.0));
     }
     #endif
@@ -375,7 +383,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         vec3 cb = clamp(color, 0.0, 1.0);
         color = mix(color, cb * cb * (3.0 - 2.0 * cb), nW * 0.30);                 // a little contrast back
         vec3 fogLift = vec3(0.004, 0.010, 0.020) * nW * clamp(NIGHT_FOG, 0.25, 2.0);  // faint blue glow, not a grey veil
-        color = fogLift + color * (1.0 - fogLift);
+        color = softLift(color, fogLift);
     }
     #elif NIGHT_STYLE == 2
     {
@@ -436,7 +444,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
     vec3 sCurve = c * c * (3.0 - 2.0 * c);
     color = mix(color, sCurve, clamp(moodContrast, 0.0, 0.85));
     vec3 liftCol = vec3(0.92, 0.96, 1.04) * clamp(blackLift, 0.0, 0.08);
-    color = liftCol + color * (1.0 - liftCol);
+    color = softLift(color, liftCol);
 
     // Warmth relative to default 1.0 and clean winter saturation
     color = max(color * mix(vec3(1.0), vec3(1.025, 1.0, 0.96), WARMTH - 1.0), 0.0);
@@ -510,7 +518,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float sparkle = smoothstep(0.72, 0.96, dLum) * (1.0 - smoothstep(0.06, 0.24, dChroma));
         color = mix(color, vec3(dLum) * vec3(0.96, 0.98, 1.04), clamp(dW * 0.22, 0.0, 0.40));
         vec3 iceLift = vec3(0.022, 0.025, 0.032) * clamp(dW, 0.0, 1.5);
-        color = iceLift + color * (1.0 - iceLift);
+        color = softLift(color, iceLift);
         color += vec3(0.055, 0.060, 0.070) * sparkle * clamp(dW, 0.0, 1.5);
     }
     #endif
@@ -531,7 +539,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float aLum = luminance(color);
         color = mix(color, vec3(aLum) * vec3(0.98, 0.99, 1.02), clamp(aW * 0.30, 0.0, 0.48));
         vec3 whiteLift = vec3(0.026, 0.028, 0.032) * clamp(aW, 0.0, 1.5);
-        color = whiteLift + color * (1.0 - whiteLift);
+        color = softLift(color, whiteLift);
         color = color / (1.0 + 0.10 * clamp(aW, 0.0, 1.5) * max(color - 0.66, 0.0));
     }
     #endif
@@ -586,7 +594,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
     float shadowCoolness = (SHADOW_COOLNESS < 0.0) ? 0.85  : SHADOW_COOLNESS;
     float blackLift      = (BLACK_LIFT      < 0.0) ? 0.018 : BLACK_LIFT;
     float warmPop        = (WARM_ACCENT_POP < 0.0) ? 0.70  : WARM_ACCENT_POP;
-    float moodContrast   = (MOOD_CONTRAST   < 0.0) ? 0.14  : MOOD_CONTRAST;
+    float moodContrast   = (MOOD_CONTRAST   < 0.0) ? 0.10  : MOOD_CONTRAST;
     float pastel         = clamp(PASTEL_AMOUNT, 0.0, 1.5);
 
     // 1) Gentle conifer cooling so spruce/birch harmonises with lavender snow
@@ -600,7 +608,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
     float chroma  = max(color.r, max(color.g, color.b)) - min(color.r, min(color.g, color.b));
     float neutralHi = hiW * (1.0 - smoothstep(0.08, 0.30, chroma));
 
-    vec3 lavShadow = mix(vec3(1.0), vec3(0.95, 0.92, 1.10), shadowW * clamp(shadowCoolness * 0.85, 0.0, 1.35));
+    vec3 lavShadow = mix(vec3(1.0), vec3(0.97, 0.96, 1.05), shadowW * clamp(shadowCoolness * 0.85, 0.0, 1.35));
     vec3 pinkSnow  = mix(vec3(1.0), vec3(1.045, 0.985, 1.015), neutralHi * clamp(pastel * 0.75, 0.0, 1.0) * (1.0 - rainStrength * 0.7));
     color = max(color * lavShadow * pinkSnow, 0.0);
 
@@ -611,7 +619,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
 
     float l0 = luminance(color);
     float weatherDesat = mix(1.0, 0.74, rainStrength);
-    float effSat = SATURATION * mix(0.98, 0.93, clamp(pastel * 0.65, 0.0, 1.0)) * weatherDesat;
+    float effSat = SATURATION * mix(1.14, 1.08, clamp(pastel * 0.65, 0.0, 1.0)) * weatherDesat;   // clean pastel colour, not washed out
     color = max(mix(vec3(l0), color, effSat), 0.0);
 
     // 4) Gentle S-curve + smooth filmic highlight rolloff (creamy, never harsh)
@@ -623,11 +631,11 @@ vec3 applyLook(vec3 color, vec2 uv) {
     // 5) Lifted cool-purple toe so interiors and undersides stay pleasant lavender, not black
     vec3 liftTint = mix(vec3(0.92, 0.90, 1.06), vec3(0.96, 0.88, 1.12), clamp(pastel * 0.70, 0.0, 1.0));
     vec3 liftCol  = liftTint * clamp(blackLift, 0.0, 0.08);
-    color = liftCol + color * (1.0 - liftCol);
+    color = softLift(color, liftCol);
 
     // Subtle pastel overcast grey-lavender veil during snow/rain
     vec3 snowVeil = vec3(0.016, 0.015, 0.024) * rainStrength;
-    color = snowVeil + color * (1.0 - snowVeil);
+    color = softLift(color, snowVeil);
 
     // Respect user WARMTH adjustments relative to default 1.0
     color = max(color * mix(vec3(1.0), vec3(1.025, 1.0, 0.96), WARMTH - 1.0), 0.0);
@@ -663,7 +671,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float mSh = 1.0 - smoothstep(0.04, 0.44, mLum);
         color *= mix(vec3(1.0), vec3(0.92, 1.03, 1.06), clamp(mSh * mW * 0.48, 0.0, 1.0));
         vec3 mintLift = vec3(0.008, 0.014, 0.016) * clamp(mW, 0.0, 1.5);
-        color = mintLift + color * (1.0 - mintLift);
+        color = softLift(color, mintLift);
     }
     #elif MORNING_STYLE == 2
     {
@@ -672,7 +680,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float mLum = luminance(color);
         color = mix(color, vec3(mLum) * vec3(0.98, 0.97, 1.04), clamp(mW * 0.16, 0.0, 0.32));
         vec3 dewLift = vec3(0.016, 0.015, 0.022) * clamp(mW, 0.0, 1.5);
-        color = dewLift + color * (1.0 - dewLift);
+        color = softLift(color, dewLift);
     }
     #endif
     #if MIDDAY_STYLE == 1
@@ -685,7 +693,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         color *= mix(vec3(1.0), vec3(1.07, 0.96, 1.03), clamp(dHi * dW * 0.55, 0.0, 1.0));
         color *= mix(vec3(1.0), vec3(0.96, 0.94, 1.08), clamp(dSh * dW * 0.48, 0.0, 1.0));
         vec3 candyLift = vec3(0.012, 0.010, 0.018) * clamp(dW, 0.0, 1.5);
-        color = candyLift + color * (1.0 - candyLift);
+        color = softLift(color, candyLift);
     }
     #elif MIDDAY_STYLE == 2
     {
@@ -697,7 +705,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         color *= mix(vec3(1.0), vec3(1.10, 1.00, 0.85), clamp(dHi * dW * 0.58, 0.0, 1.0));
         color *= mix(vec3(1.0), vec3(1.02, 0.96, 0.98), clamp(dSh * dW * 0.42, 0.0, 1.0));
         vec3 peachHaze = vec3(0.018, 0.012, 0.008) * clamp(dW, 0.0, 1.5);
-        color = peachHaze + color * (1.0 - peachHaze);
+        color = softLift(color, peachHaze);
     }
     #endif
     #if AFTERNOON_STYLE == 1
@@ -710,7 +718,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         color *= mix(vec3(1.0), vec3(1.12, 0.98, 0.82), clamp(aHi * aW * 0.60, 0.0, 1.0));
         color *= mix(vec3(1.0), vec3(0.97, 0.93, 1.06), clamp(aSh * aW * 0.46, 0.0, 1.0));
         vec3 apricotLift = vec3(0.016, 0.010, 0.006) * clamp(aW, 0.0, 1.5);
-        color = apricotLift + color * (1.0 - apricotLift);
+        color = softLift(color, apricotLift);
     }
     #elif AFTERNOON_STYLE == 2
     {
@@ -719,7 +727,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float aLum = luminance(color);
         color = mix(color, vec3(aLum) * vec3(0.98, 0.93, 1.08), clamp(aW * 0.22, 0.0, 0.40));
         vec3 lavLift = vec3(0.014, 0.011, 0.024) * clamp(aW, 0.0, 1.5);
-        color = lavLift + color * (1.0 - lavLift);
+        color = softLift(color, lavLift);
     }
     #endif
     #if SUNSET_STYLE == 1
@@ -751,7 +759,7 @@ vec3 applyLook(vec3 color, vec2 uv) {
         float nl = luminance(color);
         color = mix(color, vec3(nl) * vec3(0.92, 0.92, 1.10), nW * 0.24);
         vec3 mistLift = vec3(0.012, 0.012, 0.026) * nW * clamp(NIGHT_FOG, 0.25, 2.0);
-        color = mistLift + color * (1.0 - mistLift);
+        color = softLift(color, mistLift);
     }
     #elif NIGHT_STYLE == 2
     {
@@ -781,14 +789,21 @@ void main() {
     // two wide levels instead of three: the same soft glow for 2/3 of the work
     vec3 bloom = sampleBloomLevel(3.5) * 0.60
                + sampleBloomLevel(5.5) * 0.40;
+#if LOOK_STYLE == 3
+    color = mix(color, bloom, 0.11 * BLOOM_STRENGTH);   // Dreamy: a softer, wider glow around the sun and bright things
+#else
     color = mix(color, bloom, 0.07 * BLOOM_STRENGTH);
+#endif
 #endif
 
     // brighten things up a bit in caves and at night so it's not pitch black
     float eyeSky = eyeBrightnessSmooth.y / 240.0;
-    float exposure = mix(1.9, 1.0, eyeSky);
+    float exposure = mix(1.75, 1.0, smoothstep(0.0, 0.45, eyeSky));   // caves and night, not forest shade
 #if !defined NETHER && !defined END
     exposure *= mix(1.0, 1.7, getNightFactor(getSunHeight()) * eyeSky);
+#endif
+#if LOOK_STYLE == 3
+    exposure *= 1.12;   // Dreamy is high-key, like his
 #endif
     color *= exposure * EXPOSURE * 0.80;
 

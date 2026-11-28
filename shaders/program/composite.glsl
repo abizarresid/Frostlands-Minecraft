@@ -25,16 +25,16 @@ const vec4 colortex2ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #elif LOOK_STYLE == 1
     // PNW Moody: clear near-field (0-56m), layered blue-slate ridge perspective,
     // patchy drifting mid-slope clouds (Y 95-170), and low Puget Sound marine layer
-    #define LOOK_HAZE_MUL      1.15
-    #define LOOK_HAZE_START    56.0
+    #define LOOK_HAZE_MUL      0.85
+    #define LOOK_HAZE_START    72.0
     #define LOOK_HAZE_TINT     vec3(0.86, 0.92, 1.00)
-    #define LOOK_FOG_DESAT     0.24
-    #define LOOK_MIST_MUL      1.20
+    #define LOOK_FOG_DESAT     0.12
+    #define LOOK_MIST_MUL      0.80
     #define LOOK_MIST_TINT     vec3(0.92, 0.96, 1.02)
-    #define LOOK_CLOUD_MUL     ((MOUNTAIN_CLOUDS < 0.0) ? 1.35 : MOUNTAIN_CLOUDS)
+    #define LOOK_CLOUD_MUL     ((MOUNTAIN_CLOUDS < 0.0) ? 0.55 : MOUNTAIN_CLOUDS)   // (1.35 made a white wall when you stood in the band)
     #define LOOK_CLOUD_Y_LOW   95.0
     #define LOOK_CLOUD_Y_HIGH  170.0
-    #define LOOK_FOREST_FOG    (((FOREST_FOG < 0.0) ? 0.55 : FOREST_FOG) * 0.42)
+    #define LOOK_FOREST_FOG    (((FOREST_FOG < 0.0) ? 0.30 : FOREST_FOG) * 0.42)
 #elif LOOK_STYLE == 2
     // Clear Winter: long crisp visibility, light icy-blue haze, minimal mist & high clouds
     #define LOOK_HAZE_MUL      0.45
@@ -50,16 +50,16 @@ const vec4 colortex2ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 #else
     // Dreamy (LOOK_STYLE == 3): crisp near-field, milky lavender-pink distance & low-area haze,
     // heavy luminous grey-lavender fog in snowy/overcast weather
-    #define LOOK_HAZE_MUL      (0.60 + rainStrength * 1.1)     // crisp days, thick only in snow/rain (was 1.18: a white-out)
+    #define LOOK_HAZE_MUL      (0.42 + rainStrength * 1.1)     // crisp days, thick only in snow/rain (was 1.18: a white-out)
     #define LOOK_HAZE_START    96.0
     #define LOOK_HAZE_TINT     vec3(1.03, 0.97, 1.07)
     #define LOOK_FOG_DESAT     0.16
-    #define LOOK_MIST_MUL      (0.55 + rainStrength * 0.9)
+    #define LOOK_MIST_MUL      (0.35 + rainStrength * 0.9)
     #define LOOK_MIST_TINT     vec3(1.02, 0.96, 1.08)
-    #define LOOK_CLOUD_MUL     ((MOUNTAIN_CLOUDS < 0.0) ? 0.85 : MOUNTAIN_CLOUDS)
+    #define LOOK_CLOUD_MUL     ((MOUNTAIN_CLOUDS < 0.0) ? 0.60 : MOUNTAIN_CLOUDS)
     #define LOOK_CLOUD_Y_LOW   110.0
     #define LOOK_CLOUD_Y_HIGH  190.0
-    #define LOOK_FOREST_FOG    (((FOREST_FOG < 0.0) ? 0.50 : FOREST_FOG) * 0.42)
+    #define LOOK_FOREST_FOG    (((FOREST_FOG < 0.0) ? 0.20 : FOREST_FOG) * 0.42)
 #endif
 #include "/lib/uniforms.glsl"
 #include "/lib/common.glsl"
@@ -301,11 +301,21 @@ vec3 dhScreenToView(vec2 uv, float depth) {
 // The sea far away, beyond the normal render distance: no waves out there anyway, so a cheap version of
 // renderWater: sky and cloud reflection, the dark body of the water, a hint of the sea floor in the shallows.
 vec3 renderFarWater(vec3 floorColor, vec3 viewPos, vec3 floorPos, vec3 viewDir) {
-    vec3 n = mat3(gbufferModelView) * vec3(0.0, 1.0, 0.0);
-    // the open sea is never a flat mirror: its waves tilt the surface, so at low angles it reflects far less sky than
-    // flat water would. Treat the far sea as that rough (as dark as the wavy near water), or it turns into a bright
-    // band at the edge of the normal render distance, and Distant Horizons' detail rings show as lighter slabs
-    float cosTheta = max(clamp(dot(-viewDir, n), 0.0, 1.0), 0.22);
+    // the far sea gets waves too: a gentle, slowly drifting swell tilts the surface, so it breaks up the sky reflection
+    // like the near water instead of being a flat mirror (2026-11-27: the far sea looked like plain Minecraft water).
+    // The swell grows with distance so it never shimmers.
+    vec3 wpos = (gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz + cameraPosition;
+    float sc = max(9.0, length(viewPos) * 0.035);
+    vec2 drift = vec2(frameTimeCounter * 0.045, frameTimeCounter * 0.028);
+    float h0 = valueNoise(wpos.xz / sc + drift), hx = valueNoise((wpos.xz + vec2(0.5 * sc, 0.0)) / sc + drift);
+    float hz = valueNoise((wpos.xz + vec2(0.0, 0.5 * sc)) / sc + drift);
+    float h1 = valueNoise(wpos.xz / (sc * 0.37) - drift * 1.6), h1x = valueNoise((wpos.xz + vec2(0.18 * sc, 0.0)) / (sc * 0.37) - drift * 1.6);
+    float h1z = valueNoise((wpos.xz + vec2(0.0, 0.18 * sc)) / (sc * 0.37) - drift * 1.6);
+    vec2 slope = vec2(hx - h0, hz - h0) * 0.42 + vec2(h1x - h1, h1z - h1) * 0.22;
+    vec3 n = mat3(gbufferModelView) * normalize(vec3(-slope.x, 1.0, -slope.y));
+    // the open sea is never a flat mirror: at low angles it reflects far less sky than flat water would, or it turns
+    // into a bright band at the edge of the normal render distance
+    float cosTheta = max(clamp(dot(-viewDir, n), 0.0, 1.0), 0.18);
     float fresnel = 0.02 + 0.98 * pow(1.0 - cosTheta, 5.0);
     vec3 R = reflect(viewDir, n);
     float eyeSky = eyeBrightnessSmooth.y / 240.0;
@@ -355,7 +365,7 @@ vec3 horizonHaze(vec3 viewDir, float eyeSky) {
     // Milky lavender-pink haze in clear/sunset air; fades far trees to pale lavender silhouettes
     vec3 lavenderBase = vec3(skyLum) * mix(vec3(0.90, 0.90, 1.02), vec3(0.98, 0.88, 1.08), clamp(pastel * 0.75, 0.0, 1.0));
     vec3 sunsetTint   = mix(vec3(1.0), vec3(1.06, 0.94, 0.96), sunset * clamp(pastel, 0.0, 1.2));
-    vec3 hazeCol      = mix(lavenderBase, fogCol, 0.42 + 0.42 * sunset) * sunsetTint;
+    vec3 hazeCol      = mix(lavenderBase, fogCol, 0.65 + 0.30 * sunset) * sunsetTint;   // sky-coloured, not milky grey
     hazeCol = mix(hazeCol, vec3(luminance(hazeCol)) * vec3(0.99, 0.95, 1.05), LOOK_FOG_DESAT) * LOOK_HAZE_TINT;
 
     // Soft milky horizon veil (gentle, never harsh)
@@ -404,7 +414,7 @@ vec3 pnwAtmosphere(vec3 color, vec3 worldPos, vec3 viewDir, float dist, float ey
     float marineHeightW = inMarineY * (0.48 + 0.52 * camLow);
     float marineDist = smoothstep(mix(70.0, 28.0, rainStrength), mix(280.0, 110.0, rainStrength), dist);
     float marinePatch = mix(0.65, 1.0, smoothstep(0.22, 0.78, nMarine));
-    float marineStrength = (0.16 + 0.52 * morning + 0.42 * rainStrength) * VALLEY_MIST * LOOK_MIST_MUL;
+    float marineStrength = (0.10 + 0.52 * morning + 0.42 * rainStrength) * VALLEY_MIST * LOOK_MIST_MUL;
     float marine = clamp(marineDist * marineHeightW * marinePatch * (1.0 - exp(-dist * 0.0045 * marineStrength)), 0.0, 0.86);
 
     vec3 marineCol = (vec3(ambLum) * vec3(0.86, 0.92, 0.99) * 1.45 + dirCol * 0.07) * LOOK_MIST_TINT;
@@ -434,13 +444,13 @@ vec3 pnwAtmosphere(vec3 color, vec3 worldPos, vec3 viewDir, float dist, float ey
     // Keep foreground clear unless the player climbs directly into the cloud band
     float camInBand = smoothstep(LOOK_CLOUD_Y_LOW, LOOK_CLOUD_Y_LOW + 25.0, cameraPosition.y)
                     * (1.0 - smoothstep(LOOK_CLOUD_Y_HIGH - 10.0, LOOK_CLOUD_Y_HIGH + 35.0, cameraPosition.y));
-    float cloudDist = smoothstep(mix(48.0, 22.0, camInBand), mix(135.0, 65.0, camInBand), dist);
+    float cloudDist = smoothstep(mix(64.0, 40.0, camInBand), mix(180.0, 120.0, camInBand), dist);   // never right in your face
 
     float cloudDensity = (slopeBand * wispPatch * 0.88 + peakCeiling * 0.65 + valleyWisp * 0.55)
                        * LOOK_CLOUD_MUL * (1.0 + 0.65 * rainStrength);
-    float slopeCloud = (1.0 - exp(-dist * 0.0085 * cloudDensity)) * cloudDist * 0.86;
+    float slopeCloud = (1.0 - exp(-dist * 0.0085 * cloudDensity)) * cloudDist * 0.55;   // wisps you see the forest through, not a wall
 
-    vec3 cloudCol = vec3(ambLum) * vec3(0.92, 0.96, 1.02) * 1.62 + dirCol * (0.12 + 0.08 * sunset);
+    vec3 cloudCol = vec3(ambLum) * vec3(0.92, 0.96, 1.02) * 1.30 + dirCol * (0.10 + 0.08 * sunset);
     cloudCol *= mix(vec3(1.0), vec3(0.80, 0.85, 0.91), rainStrength);
     cloudCol = mix(cloudCol, farHazeCol, smoothstep(320.0, 760.0, dist) * 0.75);
     cloudCol = mix(vec3(0.003, 0.004, 0.006), max(cloudCol, 0.0), max(eyeSky, 0.45));
@@ -489,7 +499,9 @@ void main() {
             viewPos = dhScreenToView(texcoord, dh0);
             data = vec4(0.0);   // nothing from the normal water pass belongs to this pixel
             float dh1 = texture(dhDepthTex1, texcoord).r;
-            if (dh1 > dh0 && isEyeInWater == 0)
+            // (the wave mod flips isEyeInWater as waves pass your head while you swim: keep painting the far sea
+            //  whenever your eyes are above sea level, or it flickers to the bare sea floor)
+            if (dh1 > dh0 && (isEyeInWater == 0 || cameraPosition.y > 62.6))
                 color = renderFarWater(color, viewPos, dhScreenToView(texcoord, dh1), normalize(viewPos));
         }
     }
@@ -564,7 +576,7 @@ void main() {
         float morning = (worldTime > 22500 || worldTime < 2500) ? 1.0 : 0.0;
         // the islands all sit right on sea level, so the mist is light by day and only thick on mornings and in rain
         float forestFogBoost = (0.45 + 0.55 * clamp(rainStrength + (1.0 - smoothstep(0.05, 0.45, h)), 0.0, 1.0)) * LOOK_FOREST_FOG;
-        float mistAmount = (0.06 + 0.45 * morning + rainStrength * 0.5 + forestFogBoost) * VALLEY_MIST * LOOK_MIST_MUL;
+        float mistAmount = (0.03 + 0.45 * morning + rainStrength * 0.5 + forestFogBoost) * VALLEY_MIST * LOOK_MIST_MUL;
         const float mistFalloff = 0.06;
         float y0 = cameraPosition.y - 62.0, y1 = worldPos.y - 62.0;
         float dy = y1 - y0;
@@ -574,6 +586,7 @@ void main() {
         float mist = (1.0 - exp(-dist * clamp(avgMist, 0.0, 1.0) * 0.014 * mistAmount)) * 0.85;
         vec3 mistCol = (vec3(luminance(getAmbientColor())) * vec3(0.82, 0.90, 1.0) * 1.4 + getDirectLightColor() * 0.06) * LOOK_MIST_TINT;
 
+        mistCol = mix(mistCol, hazeCol, 0.55);   // mist takes the sky's colour instead of plain grey
         mistCol = mix(vec3(0.004, 0.005, 0.007), mistCol, eyeSky);
         color = mix(color, mistCol, mist * eyeSky);
         // mountain cloud: the peaks (Mount Ashen, the mainland ranges) sit in a layer of low cloud.
@@ -594,7 +607,15 @@ void main() {
         // area there often isn't any yet), the world really ends at the normal render distance: fade out there.
         // just after a teleport Distant Horizons' far land is still placed for the old position: don't trust it
         float settle = smoothstep(0.03, 0.25, hearthSettle);
-        bool dhGoesOn = (farLand || texture(dhDepthTex0, texcoord).r < 1.0) && settle < 0.5;
+        // Is Distant Horizons' far land built here? Decided once for the whole frame from 8 spots on screen, not per
+        // pixel: per pixel, an island seen against the sky came out in stripes (fogged where only sky was behind a
+        // column, clear where taller far land happened to be behind it). 2026-11-27.
+        int dhHits = 0;
+        for (int i = 0; i < 8; i++) {
+            vec2 sp = vec2((float(i) + 0.5) / 8.0, 0.30 + 0.40 * fract(float(i) * 0.618));
+            if (texture(dhDepthTex0, sp).r < 1.0) dhHits++;
+        }
+        bool dhGoesOn = (farLand || dhHits >= 2) && settle < 0.5;
         float edge = dhGoesOn ? max(float(dhRenderDistance), far) : far;
         float border = dhGoesOn ? smoothstep(edge * (EDGE_FOG_START - 0.2), edge * 0.95, flatDist)
                                 : smoothstep(edge * EDGE_FOG_START, edge * 0.97, flatDist);
